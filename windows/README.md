@@ -14,11 +14,11 @@ The official Remote Screen remains a separate app. Its Scale button switches bet
 
 ## Inactive addin
 
-After a Force reboot, CONNECT may report that the installed addin is inactive. It offers activation with a clear save-project warning. If accepted, it invokes **Activate-Force.ps1** in Windows PowerShell; that script re-registers the addin and restarts MPC. A small service-configuration backup is kept in WSL's private `~/.cache/piremote` folder first.
+After a Force reboot, CONNECT may report that the installed addin is inactive. It offers activation with a clear save-project warning. If accepted, it calls its WSL/SSH helper directly to re-register the addin and restart MPC. It does not require Windows PowerShell script execution. A small service-configuration backup is kept in WSL's private `~/.cache/piremote` folder first.
 
 If PowerShell blocks a downloaded script, review the archive and its origin, then use Windows Properties → Unblock on the ZIP before extracting, according to your local policy. The app does not change execution policy.
 
-Manual activation:
+Optional PowerShell script (when your policy allows local scripts); the app itself does not need it:
 
 ```powershell
 & '.\Activate-Force.ps1' -ForceIP 'YOUR_FORCE_IP'

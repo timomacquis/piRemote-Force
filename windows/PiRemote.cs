@@ -156,17 +156,19 @@ sealed class PiRemote : Form {
         shift=true;if(!await Press(target>bank?115:114,false))return;
         bank=target;slot=-1;hint.Text="Bank "+(bank==0?"01–08":"09–16")+" requested · check on Force";RefreshButtons();
     }
-    static string Tunnel(string command,string host) {
-        string helper=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"connect.py");if(!File.Exists(helper))throw new IOException("connect.py is missing.");
+    static string HelperArguments(string helper,string command,string host,bool projectSaved){
+        if(command!="connect"&&command!="disconnect"&&command!="activate")throw new InvalidOperationException("Unknown connection command");
+        if(command=="activate"&&!projectSaved)throw new InvalidOperationException("Activation requires saved-project confirmation");
         string drive=Path.GetPathRoot(helper).Substring(0,1).ToLowerInvariant();string linux="/mnt/"+drive+helper.Substring(2).Replace('\\','/');
-        ProcessStartInfo info=new ProcessStartInfo("wsl.exe","-d Ubuntu -- python3 \""+linux+"\" "+command+(host==null?"":" "+host)){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
-        using(Process p=Process.Start(info)){Task<string> output=p.StandardOutput.ReadToEndAsync(),error=p.StandardError.ReadToEndAsync();if(!p.WaitForExit(40000)){p.Kill();throw new IOException("Connection timed out.");}Task.WaitAll(output,error);if(p.ExitCode!=0)throw new IOException(error.Result.Trim());return output.Result;}
+        return "-d Ubuntu -- python3 \""+linux+"\" "+command+(host==null?"":" "+host)+(command=="activate"?" --project-saved":"");
+    }
+    static string Tunnel(string command,string host,bool projectSaved=false) {
+        string helper=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"connect.py");if(!File.Exists(helper))throw new IOException("connect.py is missing.");
+        ProcessStartInfo info=new ProcessStartInfo("wsl.exe",HelperArguments(helper,command,host,projectSaved)){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
+        using(Process p=Process.Start(info)){Task<string> output=p.StandardOutput.ReadToEndAsync(),error=p.StandardError.ReadToEndAsync();if(!p.WaitForExit(command=="activate"?120000:40000)){p.Kill();throw new IOException("Connection timed out.");}Task.WaitAll(output,error);if(p.ExitCode!=0)throw new IOException(error.Result.Trim());return output.Result;}
     }
     static void ActivateForce(string host){
-        string script=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"Activate-Force.ps1");
-        if(!File.Exists(script))throw new IOException("Activate-Force.ps1 is missing.");
-        ProcessStartInfo info=new ProcessStartInfo("powershell.exe","-NoProfile -File \""+script+"\" -ForceIP "+host+" -ProjectSaved"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
-        using(Process p=Process.Start(info)){Task<string> output=p.StandardOutput.ReadToEndAsync(),error=p.StandardError.ReadToEndAsync();if(!p.WaitForExit(120000)){p.Kill();throw new IOException("Activation timed out. Check the Force before retrying.");}Task.WaitAll(output,error);if(p.ExitCode!=0)throw new IOException(error.Result.Trim()+" "+output.Result.Trim());}
+        Tunnel("activate",host,true);
     }
     async Task BeginConnect() {
         if(wanted||disconnecting)return;
@@ -230,6 +232,9 @@ sealed class PiRemote : Form {
         if(Math.Abs(connectButton.Height*9-buttons[0].Height*4)>9)throw new Exception("Invalid connection button height");
         if(Surface(new[]{37,96},0)!="{\"t\":\"surface\",\"bytes\":[144,37,0,144,96,0]}")throw new Exception("Invalid protocol");
         if(typeof(PiButton).BaseType!=typeof(Control))throw new Exception("Native button renderer still present");
+        string activation=HelperArguments("C:\\tmp app\\πRemote\\connect.py","activate","192.0.2.70",true);
+        if(!activation.Contains("/mnt/c/tmp app/πRemote/connect.py")||!activation.EndsWith("activate 192.0.2.70 --project-saved"))throw new Exception("Invalid activation arguments");
+        bool rejected=false;try{HelperArguments("C:\\test\\connect.py","activate","192.0.2.70",false);}catch(InvalidOperationException){rejected=true;}if(!rejected)throw new Exception("Missing activation confirmation guard");
         TransportColor("play");if(!playButton.Lit)throw new Exception("PLAY indicator");
         TransportColor("record");if(!recordButton.Lit||!playButton.Lit)throw new Exception("REC indicator");
         Receive("{\"t\":\"transport\",\"playing\":false,\"recording\":false,\"source\":\"\"}");if(!recordButton.Lit)throw new Exception("Empty state should not clear indicators");

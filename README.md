@@ -22,7 +22,7 @@ The official Remote Screen is a separate application from inMusic. πRemote does
 3. Extract the Windows package, run **πRemote.exe**, enter the Force IP and click **CONNECT**.
 4. Open the official Remote Screen beside it.
 
-If the addin is installed but inactive after a restart, CONNECT can offer activation. **It asks before restarting MPC**, because unsaved project changes would be lost. The app then runs the supplied PowerShell script. It never installs an addin silently.
+If the addin is installed but inactive after a restart, CONNECT can offer activation. **It asks before restarting MPC**, because unsaved project changes would be lost. The app then calls its WSL/SSH helper directly, without requiring PowerShell script execution. It never installs an addin silently.
 
 ## Commands
 
@@ -53,7 +53,7 @@ The earlier Commander-based prototype was user-validated on Force for PLAY, STOP
 
 The standard OpenMPC installer preserves other addins. It can support persistent writable overlays, including the stacked overlay used on some 3.10.1 systems, and falls back to runtime activation where required. Its result must be checked on the actual device. A firmware update may require reinstallation.
 
-The fallback PowerShell reactivation is available from CONNECT after confirming the project is saved. See [Windows instructions](windows/README.md) and [Force installation](INSTALL.md).
+On-demand reactivation is available from CONNECT after confirming the project is saved. See [Windows instructions](windows/README.md) and [Force installation](INSTALL.md).
 
 ## Build
 

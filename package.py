@@ -1,6 +1,6 @@
 """Assemble standalone Force / Windows / source ZIPs. No device or network access."""
 from pathlib import Path
-import json,hashlib,zipfile,subprocess,re
+import json,hashlib,zipfile,subprocess,re,sys
 B=Path(__file__).resolve().parent;V='0.1.0';D=B/'dist'/V;D.mkdir(parents=True,exist_ok=True)
 def sha(raw):return hashlib.sha256(raw).hexdigest()
 force=json.loads((B/'build/BUILD.json').read_text());windows=json.loads((B/'build/windows/BUILD.json').read_text(encoding='utf-8-sig'))
@@ -30,6 +30,10 @@ for p in B.rglob('*'):
     sm[str(rel).replace('\\','/')]=p.read_bytes()
 outputs=[]
 for kind,contents in [('mpc-armv7',fm),('windows',wm),('source',sm)]:
+    if kind=='mpc-armv7' and '--keep-force' in sys.argv:
+        path=D/f'piRemote-{V}-mpc-armv7.zip';assert path.exists()
+        digest=sha(path.read_bytes());assert path.with_suffix(path.suffix+'.sha256').read_text().split()[0]==digest
+        outputs.append({'file':path.name,'sha256':digest,'bytes':path.stat().st_size});print('Unchanged Force ZIP:',path.name,digest);continue
     contents=dict(contents);contents['SHA256SUMS']=''.join(sha(raw)+'  '+name+'\n' for name,raw in sorted(contents.items())).encode()
     name=f'piRemote-{V}-{kind}.zip';top=f'piRemote-{V}-{kind}';path=D/name
     with zipfile.ZipFile(path,'w',zipfile.ZIP_DEFLATED) as z:
