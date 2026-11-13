@@ -8,6 +8,7 @@
 - Upstream surface tests for poll wakeup, partial messages, SysEx boundaries and preserved hardware running status.
 - Native Windows application self-test: four-slot layout, one 16 px CONNECT/DISCONNECT button, colours and protocol formatting.
 - Native Windows app connects, disconnects and reconnects to the standalone fake server. The fake hardware capture remains empty: no transport/navigation commands are sent during those connection tests.
+- Packaged standard installer/uninstaller passes in a disposable systemd tree, preserving another addin and touching no real service.
 - `catalog_check.py --catalog`: OK. Expected warnings: GLIBC 2.34 (OS 3.x only) and network server for manual review. This package targets Force 3.10.1, binds to localhost by default and is accessed over SSH.
 
 ## Pending on the exact standalone package
