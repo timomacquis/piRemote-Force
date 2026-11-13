@@ -8,7 +8,7 @@ Keep Akai's screen, touch control and audio. Put πRemote beside it for PLAY, ST
 
 [Download Force addin](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.0-mpc-armv7.zip) · [Download Windows app](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.0-windows.zip)
 
-![πRemote beside the official Remote Screen](docs/piremote-cover.jpg)
+![πRemote beside the official Remote Screen](docs/piremote-cover-menu.jpg)
 
 ## Two packages
 

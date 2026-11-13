@@ -17,4 +17,4 @@ Track state is local to the remote; verify the visible bank after using the Forc
 The package check reports two expected warnings: GLIBC 2.34 (OS 3.x only) and networking for manual review. The server binds to 127.0.0.1 by default. No device CPU benchmark is claimed.
 
 
-![πRemote beside the official Remote Screen](https://raw.githubusercontent.com/timomacquis/piRemote-Force/main/docs/piremote-cover.jpg)
+![πRemote beside the official Remote Screen](https://raw.githubusercontent.com/timomacquis/piRemote-Force/main/docs/piremote-cover-menu.jpg)
