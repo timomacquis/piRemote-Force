@@ -13,7 +13,7 @@ Keep Akai's screen, touch control and audio. Put πRemote beside it for PLAY, ST
 ## Two packages
 
 - **Force addin:** its own physical-button bridge and local command service.
-- **Windows app:** standalone native window, English UI, remembered IP, CONNECT/DISCONNECT, high-DPI rendering and Pin. WSL Ubuntu provides the SSH connection.
+- **Windows app:** standalone window, remembered IP, CONNECT/DISCONNECT, high-DPI rendering and Pin. WSL Ubuntu provides the SSH connection.
 
 The official Remote Screen is a separate application from inMusic. πRemote does not bundle it and is not an inMusic product.
 
