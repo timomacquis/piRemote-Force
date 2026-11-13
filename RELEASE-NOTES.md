@@ -15,3 +15,6 @@ The standalone runtime has been user-tested on Force OS 3.10.1.12. Runtime check
 Track state is local to the remote; verify the visible bank after using the Force itself. Bank 09–16 and the 08/09 boundary still need a dedicated device test with enough tracks. Transport indicators follow button events rather than audio-engine state. See VALIDATION.md for remaining checks.
 
 The package check reports two expected warnings: GLIBC 2.34 (OS 3.x only) and networking for manual review. The server binds to 127.0.0.1 by default. No device CPU benchmark is claimed.
+
+
+![πRemote beside the official Remote Screen](https://raw.githubusercontent.com/timomacquis/piRemote-Force/main/docs/piremote-cover.jpg)
