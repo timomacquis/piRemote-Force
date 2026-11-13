@@ -10,13 +10,13 @@ assert sha((B/'build/windows/πRemote.exe').read_bytes())==windows['exe_sha256']
 for name,digest in windows['inputs'].items():assert sha((B/'windows'/name).read_bytes())==digest,name
 commit=None
 if (B/'.git').exists():commit=subprocess.check_output(['git','-C',str(B),'rev-parse','HEAD'],text=True).strip()
-provenance={'version':V,'source_repo':'https://github.com/timomacquis/piRemote-Force','source_commit':commit,'force':force,'windows':windows,'installer_commit':(B/'packaging/UPSTREAM-COMMIT.txt').read_text().strip(),'tests':'Offline ASan/UBSan + fake MPC HTTP + native Windows connection lifecycle; device pending'}
+provenance={'version':V,'source_repo':'https://github.com/timomacquis/piRemote-Force','source_commit':commit,'force':force,'windows':windows,'installer_commit':(B/'packaging/UPSTREAM-COMMIT.txt').read_text().strip(),'tests':'Offline ASan/UBSan + fake MPC HTTP + native Windows connection lifecycle; user-tested standalone runtime and full reboot on Force OS 3.10.1.12','qualification':{'date':'2026-11-13','device':'Akai Force Gen1','os':'3.10.1.12','runtime_sha256':force['output_sha256'],'automatic_startup_after_full_reboot':True,'commander_loaded':False,'scope':'User-confirmed functionality and agent-observed runtime/readback/reboot; no CPU benchmark or Verified-tier claim'}}
 prov=(json.dumps(provenance,indent=2)+'\n').encode()
 common={n:(B/n).read_bytes() for n in ['LICENSE','THIRD-PARTY.md']}
 fm={**common,'piremote_addin.so':(B/'build/piremote_addin.so').read_bytes(),'INSTALL.md':(B/'INSTALL.md').read_bytes(),'USAGE.md':(B/'INSTALL.md').read_bytes(),'PROVENANCE.json':prov}
 for n in ['install.sh','uninstall.sh','addin-lib.sh','addin.manifest','piremote.conf']:fm[n]=(B/'packaging'/n).read_bytes()
 files=['LICENSE','THIRD-PARTY.md','PROVENANCE.json','USAGE.md']
-manifest={'schema':1,'id':'piremote','name':'πRemote','version':V,'kind':'addin','layout':'addin','so':'piremote_addin.so','conf':'piremote.conf','files':files,'user_data':['piremote.conf'],'arch':'armv7','max_glibc':max(force['glibc_versions'],key=lambda v:tuple(map(int,v.split('.')))),'param_compat':0,'about':'Independent transport and physical-button navigation companion for the official Remote Screen. Localhost only; use the Windows app over SSH. Offline-tested preview.','requires':'Force Gen1 OS 3.10.1; official SSH access; Windows companion','source_repo':'timomacquis/piRemote-Force','license':'MIT','cpu':None}
+manifest={'schema':1,'id':'piremote','name':'πRemote','version':V,'kind':'addin','layout':'addin','so':'piremote_addin.so','conf':'piremote.conf','files':files,'user_data':['piremote.conf'],'arch':'armv7','max_glibc':max(force['glibc_versions'],key=lambda v:tuple(map(int,v.split('.')))),'param_compat':0,'about':'Independent transport and physical-button navigation companion for the official Remote Screen. Localhost only; use the Windows app over SSH. Automatic startup, tested on Force OS 3.10.1.12.','requires':'Force Gen1 OS 3.10.1; official SSH access; Windows companion','source_repo':'timomacquis/piRemote-Force','license':'MIT','cpu':None}
 fm['mpc-plugin.json']=(json.dumps(manifest,indent=2)+'\n').encode()
 wm={**common,'README.md':(B/'windows/README.md').read_bytes(),'PROVENANCE.json':prov,'Force-IP.txt':b''}
 for n in ['πRemote.exe','πRemote.exe.config','piRemote.ico','connect.py','Activate-Force.ps1']:wm[n]=(B/'build/windows'/n).read_bytes()
@@ -48,4 +48,4 @@ for kind,contents in [('mpc-armv7',fm),('windows',wm),('source',sm)]:
         assert all(not n.startswith('/') and '..' not in Path(n).parts for n in z.namelist())
     digest=sha(path.read_bytes());path.with_suffix(path.suffix+'.sha256').write_text(digest+'  '+name+'\n')
     outputs.append({'file':name,'sha256':digest,'bytes':path.stat().st_size});print(name,path.stat().st_size,'bytes',digest)
-(D/'PACKAGES.json').write_text(json.dumps({'version':V,'device_tested':False,'packages':outputs},indent=2)+'\n')
+(D/'PACKAGES.json').write_text(json.dumps({'version':V,'device_tested':True,'validation_scope':'See VALIDATION.md; no Verified-tier claim','packages':outputs},indent=2)+'\n')

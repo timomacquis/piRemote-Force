@@ -14,7 +14,7 @@ The official Remote Screen remains a separate app. Its Scale button switches bet
 
 ## Inactive addin
 
-After a Force reboot, CONNECT may report that the installed addin is inactive. It offers activation with a clear save-project warning. If accepted, it calls its WSL/SSH helper directly to re-register the addin and restart MPC. It does not require Windows PowerShell script execution. A small service-configuration backup is kept in WSL's private `~/.cache/piremote` folder first.
+Normally the addin starts automatically with MPC; this was verified after a full reboot on the tested Force OS 3.10.1.12 installation. If CONNECT reports that the installed addin is inactive, it offers activation with a clear save-project warning. If accepted, it calls its WSL/SSH helper directly to re-register the addin and restart MPC. It does not require Windows PowerShell script execution. A small service-configuration backup is kept in WSL's private `~/.cache/piremote` folder first.
 
 If PowerShell blocks a downloaded script, review the archive and its origin, then use Windows Properties → Unblock on the ZIP before extracting, according to your local policy. The app does not change execution policy.
 
@@ -38,4 +38,4 @@ Transport colours follow physical button events, not the audio engine. Clicking 
 
 No transport/navigation commands are sent on connecting or reconnecting. Disconnect releases held navigation keys and closes only this app's SSH tunnel.
 
-This exact candidate is offline-tested; real-device installation/reboot tests are pending.
+The standalone addin and companion have been user-tested on Force OS 3.10.1.12; automatic startup after a full reboot was observed. The inactive-addin recovery path is guarded and tested offline, but its real MPC restart path remains a separate device check.

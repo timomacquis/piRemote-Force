@@ -6,6 +6,8 @@ Keep Akai's screen, touch control and audio. Put πRemote beside it for PLAY, ST
 
 **Force Gen1 · MPC OS 3.10.1 · Windows 10/11**
 
+[Download Force addin](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.0-mpc-armv7.zip) · [Download Windows app](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.0-windows.zip)
+
 ![πRemote Windows panel](docs/piremote.png)
 
 ## Two packages
@@ -39,19 +41,19 @@ Transport mirrors physical Force buttons. REC toggles record arm; use PLAY to be
 
 ## Status
 
-**0.1.0 — offline-tested; the exact standalone package is not yet device-validated.**
+**0.1.0 — tested on Force Gen1, MPC OS 3.10.1.12.**
 
-The earlier Commander-based prototype was user-validated on Force for PLAY, STOP, MATRIX and EDIT + the first two track buttons. That does not qualify this independent build as device-tested.
+The standalone addin and Windows companion have been tested by the user. The running device binary matches the release binary. A full reboot confirmed automatic startup without a PC activation command, and process maps confirmed that Commander and the former trial bridge were not loaded. See [VALIDATION.md](VALIDATION.md) for the scope and remaining checks.
 
 - ASan/UBSan parser, HTTP, transport and button-release tests pass.
 - The real addin runs against a fake MPC/raw-MIDI host in integration tests.
 - Upstream input-stream tests preserve partial messages, SysEx boundaries and running status.
 - The native Windows app connects, disconnects and reconnects to the standalone test server without emitting transport or navigation commands.
-- No CPU figure or reboot-persistence claim is made yet.
+- Automatic startup after a full Force reboot was verified on the tested installation. No CPU figure or catalogue Verified tier is claimed.
 
 ## Installation and persistence
 
-The standard OpenMPC installer preserves other addins. It can support persistent writable overlays, including the stacked overlay used on some 3.10.1 systems, and falls back to runtime activation where required. Its result must be checked on the actual device. A firmware update may require reinstallation.
+The standard OpenMPC installer preserves other addins. **Automatic startup is the normal behaviour and was verified on the tested Force.** It supports writable overlays, including the stacked overlay used on the tested 3.10.1 system, and falls back to runtime activation where required. A firmware update may require reinstallation.
 
 On-demand reactivation is available from CONNECT after confirming the project is saved. See [Windows instructions](windows/README.md) and [Force installation](INSTALL.md).
 

@@ -1,6 +1,6 @@
 # πRemote — Force installation
 
-**Candidate 0.1.0. Force Gen1 / ARM32, MPC OS 3.10.1. Not for Gen2.**
+**πRemote 0.1.0. Force Gen1 / ARM32, MPC OS 3.10.1. Not for Gen2.**
 
 This addin supplies transport and physical-button navigation for the πRemote Windows app. The official Akai Remote Screen continues to supply video, touch and audio. Commander is not required.
 
@@ -35,7 +35,7 @@ sh /data/mpc-addins/piremote/install.sh -y -n -t /data/mpc-addins/piremote
 systemctl restart acvs
 ```
 
-No reboot test of this exact package has been completed yet.
+Automatic startup after a full reboot was verified on Force OS 3.10.1.12 with the same addin binary as this release. Installation and overlay behaviour can differ on other devices or after firmware updates.
 
 ## Network
 

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "id": "piremote",
-  "name": "\u03c0Remote",
+  "name": "πRemote",
   "version": "0.1.0",
   "kind": "addin",
   "layout": "addin",
@@ -19,7 +19,7 @@
   "arch": "armv7",
   "max_glibc": "2.34",
   "param_compat": 0,
-  "about": "Independent transport and physical-button navigation companion for the official Remote Screen. Localhost only; use the Windows app over SSH. Offline-tested preview.",
+  "about": "Independent transport and physical-button navigation companion for the official Remote Screen. Localhost only; use the Windows app over SSH. Automatic startup, tested on Force OS 3.10.1.12.",
   "requires": "Force Gen1 OS 3.10.1; official SSH access; Windows companion",
   "source_repo": "timomacquis/piRemote-Force",
   "license": "MIT",
