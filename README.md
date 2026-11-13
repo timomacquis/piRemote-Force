@@ -12,7 +12,7 @@ Keep Akai's screen, touch control and audio. Put πRemote beside it for PLAY, ST
 
 ## Two packages
 
-- **Force addin:** its own physical-button bridge and local command service. No Commander installation or MIDI port is required.
+- **Force addin:** its own physical-button bridge and local command service.
 - **Windows app:** standalone native window, English UI, remembered IP, CONNECT/DISCONNECT, high-DPI rendering and Pin. WSL Ubuntu provides the SSH connection.
 
 The official Remote Screen is a separate application from inMusic. πRemote does not bundle it and is not an inMusic product.
@@ -67,6 +67,6 @@ Windows: `windows/Build-App.ps1` builds the native .NET Framework 4.8 app. It ha
 
 ## Credits
 
-The input stream hooks and JSON reader are reused under MIT from Jacob Sabella's projects. The standard addin installer is from OpenMPC. See [THIRD-PARTY.md](THIRD-PARTY.md), the pinned commits and the source licences. No Commander service is used or required.
+The input stream hooks and JSON reader are reused under MIT from Jacob Sabella's projects. The standard addin installer is from OpenMPC. See [THIRD-PARTY.md](THIRD-PARTY.md), the pinned commits and the source licences.
 
 πRemote uses no video capture, plugin polling or audio hook. The local command server is reached through a dedicated SSH tunnel, separate from the official viewer.

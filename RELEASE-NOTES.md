@@ -2,7 +2,7 @@
 
 A compact Windows transport and navigation companion for the official Akai Remote Screen.
 
-- Independent Force addin: Commander is not required.
+- Independent Force addin.
 - PLAY, STOP, REC and CONTINUE; hardware view shortcuts, SHIFT/EDIT, track selectors and plugin editing.
 - Native English Windows panel with high-DPI rendering, remembered IP, one CONNECT/DISCONNECT button and Pin.
 - Automatic startup after a full Force reboot, verified on the tested installation.
