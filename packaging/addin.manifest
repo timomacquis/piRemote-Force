@@ -1,0 +1,12 @@
+# Standard OpenMPC addin installer. Persistence depends on the actual system overlays.
+ADDIN_ID=piremote
+ADDIN_NAME="πRemote"
+ADDIN_VERSION=0.1.0
+ADDIN_SO=piremote_addin.so
+ADDIN_CONF=piremote.conf
+ADDIN_FILES="LICENSE THIRD-PARTY.md PROVENANCE.json USAGE.md"
+ADDIN_NETWORK=1
+ADDIN_WEB_PORT=6732
+ADDIN_WEB_PORT_SETTING=port
+ADDIN_WEB_PATH=/info/
+ADDIN_DONE="piRemote listens on the device only (127.0.0.1:6732). Use the Windows app over SSH. If activation does not survive a reboot, the app can offer reactivation after confirming your project is saved. No Commander dependency."
