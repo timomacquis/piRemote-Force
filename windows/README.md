@@ -39,3 +39,8 @@ Transport colours follow physical button events, not the audio engine. Clicking 
 No transport/navigation commands are sent on connecting or reconnecting. Disconnect releases held navigation keys and closes only this app's SSH tunnel.
 
 The standalone addin and companion have been user-tested on Force OS 3.10.1.12; automatic startup after a full reboot was observed. The inactive-addin recovery path is guarded and tested offline, but its real MPC restart path remains a separate device check.
+
+
+## FIND — Windows 0.1.1
+
+FIND scans the current /24 portion of up to four active Windows Ethernet/Wi-Fi IPv4 networks, limited by the adapter mask. It checks SSH availability, then uses existing WSL trusted host keys and key authentication to verify MPC and read its hostname. It never accepts a new SSH identity, activates the addin, sends transport/navigation commands or opens a tunnel. Select an address if several devices are found, then press CONNECT separately. Unknown devices need their SSH fingerprint verified in WSL first. Offline trust/timeout/bounds tests and native Windows connection regression pass; real-network FIND was confirmed working by the user on 14 November 2026. Compatible with the existing Force addin 0.1.0.

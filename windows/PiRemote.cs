@@ -6,6 +6,8 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -15,8 +17,8 @@ using System.Windows.Forms;
 [assembly:System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.8",FrameworkDisplayName=".NET Framework 4.8")]
 [assembly:System.Reflection.AssemblyTitle("πRemote")]
 [assembly:System.Reflection.AssemblyProduct("πRemote")]
-[assembly:System.Reflection.AssemblyVersion("0.1.0.0")]
-[assembly:System.Reflection.AssemblyFileVersion("0.1.0.0")]
+[assembly:System.Reflection.AssemblyVersion("0.1.1.0")]
+[assembly:System.Reflection.AssemblyFileVersion("0.1.1.0")]
 
 sealed class PiButton : Control {
     public bool Lit;
@@ -54,7 +56,8 @@ sealed class PiRemote : Form {
     readonly SemaphoreSlim sendLock=new SemaphoreSlim(1,1);
     readonly JavaScriptSerializer json=new JavaScriptSerializer(){MaxJsonLength=16*1024*1024};
     readonly TextBox hostBox=new TextBox();
-    PiButton connectButton,bankOne,bankTwo;
+    PiButton connectButton,findButton,bankOne,bankTwo;
+    bool finding;
     CancellationTokenSource session;
     Task sessionTask;
     bool activationOffered,allowActivation=true,activating;
@@ -69,9 +72,10 @@ sealed class PiRemote : Form {
         AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;Font=new Font("Segoe UI",8.5f);
         state.Text="Disconnected";
         CheckBox pin=new CheckBox(){Text="Pin",AutoSize=true,ForeColor=ink};pin.SetBounds(232,430,46,20);pin.CheckedChanged+=delegate{TopMost=pin.Checked;};Controls.Add(pin);
-        hostBox.SetBounds(10,14,160,25);hostBox.Font=new Font("Segoe UI",10f);hostBox.BackColor=Color.FromArgb(35,43,48);hostBox.ForeColor=ink;hostBox.BorderStyle=BorderStyle.FixedSingle;tips.SetToolTip(hostBox,"Force IP address · saved when connecting");
+        hostBox.SetBounds(10,14,132,25);hostBox.Font=new Font("Segoe UI",10f);hostBox.BackColor=Color.FromArgb(35,43,48);hostBox.ForeColor=ink;hostBox.BorderStyle=BorderStyle.FixedSingle;tips.SetToolTip(hostBox,"Force IP address · saved when connecting");
         string ipFile=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"Force-IP.txt");hostBox.Text=File.Exists(ipFile)?File.ReadAllText(ipFile).Trim():"";Controls.Add(hostBox);
-        connectButton=new PiButton(){Text="CONNECT",ForeColor=ink,Font=new Font("Segoe UI",7.5f),Accent=Color.FromArgb(113,190,145)};connectButton.SetBounds(176,18,102,16);connectButton.Click+=async delegate{if(wanted)await Disconnect();else await BeginConnect();};Controls.Add(connectButton);
+        connectButton=new PiButton(){Text="CONNECT",ForeColor=ink,Font=new Font("Segoe UI",7.5f),Accent=Color.FromArgb(113,190,145)};connectButton.SetBounds(200,18,78,16);connectButton.Click+=async delegate{if(wanted)await Disconnect();else await BeginConnect();};Controls.Add(connectButton);
+        findButton=new PiButton(){Text="FIND",ForeColor=ink,Font=new Font("Segoe UI",7.5f),Accent=violet};findButton.SetBounds(148,18,46,16);findButton.Click+=async delegate{await FindDevice();};Controls.Add(findButton);tips.SetToolTip(findButton,"Find trusted MPC/Force devices on this PC’s local network. Does not connect or restart MPC.");
         string[] transport={"▶ PLAY","■ STOP","● REC","CONTINUE"};string[] commands={"play","stop","record","continue"};
         for(int i=0;i<4;i++){string cmd=commands[i];PiButton b=Add(transport[i],10+i*68,68,64,async delegate{await Transport(cmd);});if(i==0){playButton=b;b.Accent=Color.FromArgb(113,190,145);}if(i==2){recordButton=b;b.Accent=Color.FromArgb(222,112,130);}}
         tips.SetToolTip(playButton,"Green follows PLAY/STOP button events. This is not audio-engine telemetry.");
@@ -101,7 +105,7 @@ sealed class PiRemote : Form {
     }
     void RefreshButtons() {
         if(IsDisposed)return;
-        hostBox.Enabled=!wanted&&!disconnecting;connectButton.Enabled=!disconnecting&&!activating;connectButton.Text=wanted?(ready?"DISCONNECT":"CANCEL"):"CONNECT";
+        hostBox.Enabled=!wanted&&!disconnecting&&!finding;findButton.Enabled=!wanted&&!disconnecting&&!finding;findButton.Text=finding?"…":"FIND";connectButton.Enabled=!disconnecting&&!activating&&!finding;connectButton.Text=wanted?(ready?"DISCONNECT":"CANCEL"):"CONNECT";
         connectButton.Lit=ready;connectButton.Invalidate();
         foreach(PiButton b in buttons)b.Enabled=ready&&!busy;
         previousButton.Enabled=ready&&!busy&&slot>=0&&(slot>0||bank>0);nextButton.Enabled=ready&&!busy&&slot>=0&&(slot<7||bank<1);pluginButton.Enabled=ready&&!busy&&slot>=0;
@@ -156,6 +160,52 @@ sealed class PiRemote : Form {
         shift=true;if(!await Press(target>bank?115:114,false))return;
         bank=target;slot=-1;hint.Text="Bank "+(bank==0?"01–08":"09–16")+" requested · check on Force";RefreshButtons();
     }
+    static List<string> NetworkCandidates() {
+        var addresses=new HashSet<string>();int networks=0;
+        foreach(var nic in NetworkInterface.GetAllNetworkInterfaces()) {
+            if(nic.OperationalStatus!=OperationalStatus.Up||(nic.NetworkInterfaceType!=NetworkInterfaceType.Ethernet&&nic.NetworkInterfaceType!=NetworkInterfaceType.Wireless80211))continue;
+            var props=nic.GetIPProperties();if(!props.GatewayAddresses.Any(g=>g.Address.AddressFamily==AddressFamily.InterNetwork&&!g.Address.Equals(IPAddress.Any)))continue;
+            foreach(var u in props.UnicastAddresses) {
+                if(u.Address.AddressFamily!=AddressFamily.InterNetwork||IPAddress.IsLoopback(u.Address))continue;
+                byte[] ip=u.Address.GetAddressBytes(),mask=u.IPv4Mask.GetAddressBytes();if(ip[0]==169&&ip[1]==254)continue;
+                if(++networks>4)break;
+                for(int i=1;i<255;i++){byte[] candidate={ip[0],ip[1],ip[2],(byte)i};bool same=true;for(int k=0;k<4;k++)if((candidate[k]&mask[k])!=(ip[k]&mask[k]))same=false;if(same&&i!=ip[3])addresses.Add(new IPAddress(candidate).ToString());}
+            }
+        }
+        return addresses.ToList();
+    }
+    static List<string> OpenSshHosts(List<string> hosts,CancellationToken token) {
+        var found=new System.Collections.Concurrent.ConcurrentBag<string>();
+        Parallel.ForEach(hosts,new ParallelOptions(){MaxDegreeOfParallelism=48,CancellationToken=token},host=>{
+            try{using(var client=new TcpClient()){var task=client.ConnectAsync(host,22);if(task.Wait(400)&&client.Connected)found.Add(host);}}catch(AggregateException){}catch(SocketException){}
+        });return found.OrderBy(x=>x).Take(128).ToList();
+    }
+    async Task FindDevice() {
+        if(wanted||finding||disconnecting)return;finding=true;hint.Text="Searching the local network…";RefreshButtons();
+        try {
+            var hosts=NetworkCandidates();if(hosts.Count==0)throw new IOException("No active local IPv4 network found.");
+            var candidates=await Task.Run(()=>OpenSshHosts(hosts,closing.Token));closing.Token.ThrowIfCancellationRequested();
+            if(candidates.Count==0){hint.Text="No SSH device found · check Wi-Fi/Ethernet.";return;}
+            string raw=await Task.Run(()=>DiscoverHosts(candidates));closing.Token.ThrowIfCancellationRequested();
+            var result=json.DeserializeObject(raw) as Dictionary<string,object>;var devices=result==null?null:result["devices"] as object[];
+            if(devices==null||devices.Length==0){hint.Text="No trusted MPC found · check WSL SSH setup.";return;}
+            var list=devices.Select(x=>(Dictionary<string,object>)x).ToList();string selected=null;
+            if(list.Count==1)selected=Convert.ToString(list[0]["host"]);
+            else using(var picker=new Form(){Text="πRemote · Select device",ClientSize=new Size(310,100+Math.Min(list.Count,8)*24),BackColor=BackColor,ForeColor=ForeColor,FormBorderStyle=FormBorderStyle.FixedToolWindow,StartPosition=FormStartPosition.CenterParent}) {
+                var choices=new ListBox(){Dock=DockStyle.Top,Height=40+Math.Min(list.Count,8)*24,BackColor=BackColor,ForeColor=ForeColor};foreach(var d in list)choices.Items.Add(Convert.ToString(d["name"])+" · "+Convert.ToString(d["host"]));choices.SelectedIndex=0;picker.Controls.Add(choices);
+                var use=new PiButton(){Text="USE IP",ForeColor=ForeColor,Dock=DockStyle.Bottom,Height=36};use.Click+=delegate{selected=Convert.ToString(list[choices.SelectedIndex]["host"]);picker.DialogResult=DialogResult.OK;};picker.Controls.Add(use);picker.ShowDialog(this);
+            }
+            if(selected!=null){hostBox.Text=selected;hint.Text="Device found · press CONNECT.";}
+        }catch(OperationCanceledException){}catch(Exception e){if(!IsDisposed)hint.Text=e.Message;}
+        finally{finding=false;if(!IsDisposed)RefreshButtons();}
+    }
+    static string DiscoverHosts(List<string> hosts) {
+        string helper=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"discover.py");if(!File.Exists(helper))throw new IOException("discover.py is missing.");
+        string drive=Path.GetPathRoot(helper).Substring(0,1).ToLowerInvariant();string linux="/mnt/"+drive+helper.Substring(2).Replace('\\','/');
+        foreach(string host in hosts){IPAddress ip;if(!IPAddress.TryParse(host,out ip)||ip.AddressFamily!=AddressFamily.InterNetwork)throw new IOException("Invalid discovery address.");}
+        var info=new ProcessStartInfo("wsl.exe","-d Ubuntu -- python3 \""+linux+"\" "+string.Join(",",hosts)){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
+        using(var process=Process.Start(info)){var output=process.StandardOutput.ReadToEndAsync();var error=process.StandardError.ReadToEndAsync();if(!process.WaitForExit(90000)){process.Kill();throw new IOException("Discovery timed out.");}Task.WaitAll(output,error);if(process.ExitCode!=0)throw new IOException(error.Result.Trim());return output.Result;}
+    }
     static string HelperArguments(string helper,string command,string host,bool projectSaved){
         if(command!="connect"&&command!="disconnect"&&command!="activate")throw new InvalidOperationException("Unknown connection command");
         if(command=="activate"&&!projectSaved)throw new InvalidOperationException("Activation requires saved-project confirmation");
@@ -171,7 +221,7 @@ sealed class PiRemote : Form {
         Tunnel("activate",host,true);
     }
     async Task BeginConnect() {
-        if(wanted||disconnecting)return;
+        if(wanted||disconnecting||finding)return;
         string host=hostBox.Text.Trim();System.Net.IPAddress ip;
         if(!System.Net.IPAddress.TryParse(host,out ip)||ip.AddressFamily!=System.Net.Sockets.AddressFamily.InterNetwork){hint.Text="Invalid IPv4 address.";return;}
         try{File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"Force-IP.txt"),host,new UTF8Encoding(false));}catch(Exception e){hint.Text=e.Message;return;}

@@ -6,7 +6,7 @@ Keep Akai's screen, touch control and audio. Put πRemote beside it for PLAY, ST
 
 **Force Gen1 · MPC OS 3.10.1 · Windows 10/11**
 
-[Download Force addin](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.0-mpc-armv7.zip) · [Download Windows app](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.0-windows.zip)
+[Download Force addin](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.0-mpc-armv7.zip) · [Download Windows app](https://github.com/timomacquis/piRemote-Force/releases/latest/download/piRemote-0.1.1-windows.zip)
 
 ![πRemote beside the official Remote Screen](docs/piremote-cover-menu.jpg)
 
@@ -70,3 +70,8 @@ Windows: `windows/Build-App.ps1` builds the native .NET Framework 4.8 app. It ha
 The input stream hooks and JSON reader are reused under MIT from Jacob Sabella's projects. The standard addin installer is from OpenMPC. See [THIRD-PARTY.md](THIRD-PARTY.md), the pinned commits and the source licences.
 
 πRemote uses no video capture, plugin polling or audio hook. The local command server is reached through a dedicated SSH tunnel, separate from the official viewer.
+
+
+## FIND — Windows 0.1.1
+
+FIND scans the current /24 portion of up to four active Windows Ethernet/Wi-Fi IPv4 networks, limited by the adapter mask. It checks SSH availability, then uses existing WSL trusted host keys and key authentication to verify MPC and read its hostname. It never accepts a new SSH identity, activates the addin, sends transport/navigation commands or opens a tunnel. Select an address if several devices are found, then press CONNECT separately. Unknown devices need their SSH fingerprint verified in WSL first. Offline trust/timeout/bounds tests and native Windows connection regression pass; real-network FIND was confirmed working by the user on 14 November 2026. Compatible with the existing Force addin 0.1.0.

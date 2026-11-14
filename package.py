@@ -19,7 +19,7 @@ files=['LICENSE','THIRD-PARTY.md','PROVENANCE.json','USAGE.md']
 manifest={'schema':1,'id':'piremote','name':'πRemote','version':V,'kind':'addin','layout':'addin','so':'piremote_addin.so','conf':'piremote.conf','files':files,'user_data':['piremote.conf'],'arch':'armv7','max_glibc':max(force['glibc_versions'],key=lambda v:tuple(map(int,v.split('.')))),'param_compat':0,'about':'Independent transport and physical-button navigation companion for the official Remote Screen. Localhost only; use the Windows app over SSH. Automatic startup, tested on Force OS 3.10.1.12.','requires':'Force Gen1 OS 3.10.1; official SSH access; Windows companion','source_repo':'timomacquis/piRemote-Force','license':'MIT','cpu':None}
 fm['mpc-plugin.json']=(json.dumps(manifest,indent=2)+'\n').encode()
 wm={**common,'README.md':(B/'windows/README.md').read_bytes(),'PROVENANCE.json':prov,'Force-IP.txt':b''}
-for n in ['πRemote.exe','πRemote.exe.config','piRemote.ico','connect.py','Activate-Force.ps1']:wm[n]=(B/'build/windows'/n).read_bytes()
+for n in ['πRemote.exe','πRemote.exe.config','piRemote.ico','connect.py','discover.py','Activate-Force.ps1']:wm[n]=(B/'build/windows'/n).read_bytes()
 sm={}
 tracked=None
 if (B/'.git').exists():tracked=set(subprocess.check_output(['git','-C',str(B),'ls-files','-z']).decode().split('\0'))

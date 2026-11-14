@@ -31,3 +31,7 @@
 - No CPU benchmark or catalogue Verified tier is claimed. The requested initial listing is Listed.
 
 The earlier Commander-backed prototype's tests are retained as historical context, not substituted for the independent build's evidence. Private device logs and boot identifiers remain local; the public record contains no personal IP address or SSH key.
+
+## Windows 0.1.1 — FIND, 14 November 2026
+
+The user confirmed FIND works on the real network. Offline tests cover trusted-key discovery after an IP change, unknown-key rejection, read-only SSH commands, timeout and candidate limits. Native Windows connect/disconnect/reconnect regression passed with no physical commands emitted. This Windows-only update retains the released Force addin 0.1.0 unchanged; it does not qualify the unresolved remote/piremote shared-hook combination.

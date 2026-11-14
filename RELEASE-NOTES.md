@@ -1,3 +1,15 @@
+# Windows 0.1.1 — FIND
+
+- Add FIND beside the IP field without changing the compact panel size.
+- Discover MPC/Force devices on the local network using existing trusted WSL SSH keys.
+- Fill the discovered IP, or choose a device when several are found; CONNECT remains separate.
+- No automatic connection, addin activation or MPC restart during discovery.
+- User-confirmed on the real network; discovery trust/bounds tests and native Windows connection regression pass.
+
+**Windows update only. Keep the Force addin 0.1.0 already installed.** Download `piRemote-0.1.1-windows.zip` and extract all files together; retain your existing `Force-IP.txt` if desired. The original Force ZIP is unchanged.
+
+---
+
 # πRemote 0.1.0
 
 A compact Windows transport and navigation companion for the official Akai Remote Screen.
